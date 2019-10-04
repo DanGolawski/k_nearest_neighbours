@@ -1,0 +1,49 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'class'] #defining names of collumns
+
+dataset = pd.read_csv('./iris.data', header=None, names=names)
+
+x = np.array(dataset.iloc[:,0:4])  # pandas iloc to create table by indexes - array of dimensions of sepals and petails
+y = np.array(dataset.iloc[:,4]) # array of flower type name
+print(dataset)
+xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size=0.33, random_state=42) # creates subarrays to train and test
+
+def findTheMostCommon(targets):
+    targets = sorted(targets)
+    current = targets[0]
+    theMostCommon = targets[0]
+    counter = 0;
+    count = 0;
+    for i in targets:
+        if(i == current):
+            counter += 1
+        else:
+            if(counter >= count):
+                count = counter
+                theMostCommon = current
+            counter = 1
+            current = i
+    return theMostCommon
+
+# method to predict type of flower
+def predict(x,y,object,k):
+    distances = []
+    targets = []
+    for i in range(len(x)):
+        distances.append([np.sqrt(np.sum(np.square(object-x[i,:]))),y[i]])
+    distances = sorted(distances)
+    for t in range(k):
+        targets.append(distances[t][1])
+    return findTheMostCommon(targets)
+
+
+results = []
+for x in xTest:
+    results.append(predict(xTrain, yTrain, x, 40))
+
+accuracy = accuracy_score(yTest, results) * 100
+print('\nThe accuracy of OUR classifier is %d%%' % accuracy)
